@@ -89,112 +89,73 @@ class DCSClient:
             print(f"  ✓ Created config directory: {config_path}")
 
             # Copy appSettings.lua
-            self._copy_app_settings(config_path)
-            
-            # Copy the minimal Options.lua
-            self._copy_minimal_options(config_path)
-            # self._copy_reference_options(config_path)
-            
-            # Copy authdata.bin from main DCS directory
-            self._copy_authdata(config_path)
+            self._copy_config(config_path)
 
-            # Copy shader directories
-            self._copy_shader_dirs(instance_path)
+            # Copy references from the reference directory
+            self._copy_references(config_path)
             
         except Exception as e:
             print(f"  ! Could not pre-setup config: {e}")
             print(f"  DCS will create directory structure when it starts")
 
-    def _copy_minimal_options(self, config_path):
+    def _copy_config(self, config_path):
         """
         Copy minimal Options.lua to the config directory.
         """
         # Get the path to the Options.lua file in our project
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        options_source = os.path.join(current_dir, "Options.lua")
+        options_source = os.path.join(current_dir, "dcs_config")
         options_dest = os.path.join(config_path, "options.lua")
-        
-        if os.path.exists(options_source):
-            shutil.copy2(options_source, options_dest)
-            print(f"  ✓ Copied Options.lua to: {options_dest}")
-        
-    def _copy_app_settings(self, config_path):
-        """
-        Copy appSettings.lua to the config directory.
-        """
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        app_settings_source = os.path.join(current_dir, "appSettings.lua")
-        app_settings_dest = os.path.join(config_path, "appSettings.lua")
 
-        if os.path.exists(app_settings_source):
-            shutil.copy2(app_settings_source, app_settings_dest)
-            print(f"  ✓ Copied appSettings.lua to: {app_settings_dest}")
-    
-    def _copy_reference_options(self, config_path):
+        files = [
+            "Options.lua",
+            "appSettings.lua",
+            "imgui.ini"
+        ]
+        
+        for filename in files:
+            options_source = os.path.join(current_dir, "dcs_config", filename)
+            options_dest = os.path.join(config_path, filename)
+            if os.path.exists(options_source):
+                shutil.copy2(options_source, options_dest)
+                print(f"  ✓ Copied {filename} to: {options_dest}")
+
+    def _copy_references(self, config_path):
         """
         Copy Options.lua from the reference DCS directory's Config folder.
         """
-        options_source = os.path.join(self.reference_dir, "Config", "Options.lua")
+        options_source = os.path.join(self.reference_dir, "Config")
         options_dest = os.path.join(config_path, "Options.lua")
-        if os.path.exists(options_source):
-            try:
-                shutil.copy2(options_source, options_dest)
-                print(f"  ✓ Copied Options.lua from reference directory: {options_source}")
-            except Exception as e:
-                print(f"  ! Failed to copy Options.lua: {e}")
-        else:
-            print(f"  ! Options.lua not found at: {options_source}")
-            print(f"    Check that the reference directory is correct: {self.reference_dir}")
 
-    def _copy_authdata(self, config_path):
-        """
-        Copy authdata.bin from the reference DCS directory.
-        """
-        authdata_source = os.path.join(self.reference_dir, "Config", "authdata.bin")
-        
-        if os.path.exists(authdata_source):
-            authdata_dest = os.path.join(config_path, "authdata.bin")
-            try:
-                shutil.copy2(authdata_source, authdata_dest)
-                print(f"  ✓ Copied authdata.bin from: {authdata_source}")
-            except Exception as e:
-                print(f"  ! Failed to copy authdata.bin: {e}")
-        else:
-            print(f"  ! authdata.bin not found at: {authdata_source}")
-            print(f"    Check that the reference directory is correct: {self.reference_dir}")
+        filepaths = [
+            ["Config", "authdata.bin"],
+            ["Config", "network.vault"],
+            ["fxo"],
+            ["metashaders2"],
+            ["launcher.sqlite3"]
+        ]
 
-
-        network_vault_source = os.path.join(self.reference_dir, "Config", "network.vault")
-        if os.path.exists(network_vault_source):
-            network_vault_dest = os.path.join(config_path, "network.vault")
-            try:
-                shutil.copy2(network_vault_source, network_vault_dest)
-                print(f"  ✓ Copied network.vault from: {network_vault_source}")
-            except Exception as e:
-                print(f"  ! Failed to copy network.vault: {e}")
-        else:
-            print(f"  ! network.vault not found at: {network_vault_source}")
-            print(f"    Check that the reference directory is correct: {self.reference_dir}")
-    
-    def _copy_shader_dirs(self, instance_path):
-        """
-        Copy 'fxo' and 'metashaders2' directories from the reference DCS directory.
-        """
-        for dirname in ["fxo", "metashaders2"]:
-            src_dir = os.path.join(self.reference_dir, dirname)
-            dest_dir = os.path.join(instance_path, dirname)
-            if os.path.exists(src_dir):
-                try:
-                    if os.path.exists(dest_dir):
-                        shutil.rmtree(dest_dir)
-                    shutil.copytree(src_dir, dest_dir)
-                    print(f"  ✓ Copied {dirname} directory from: {src_dir}")
-                except Exception as e:
-                    print(f"  ! Failed to copy {dirname}: {e}")
+        for filepath in filepaths:
+            source_path = os.path.join(self.reference_dir, *filepath)
+            if os.path.isdir(source_path):
+                dest_path = os.path.join(config_path, *filepath)
+                if os.path.exists(dest_path):
+                    shutil.rmtree(dest_path)
+                shutil.copytree(source_path, dest_path)
+                print(f"  ✓ Copied directory {filepath[-1]} from reference directory: {source_path}")
+                continue
             else:
-                print(f"  ! {dirname} directory not found at: {src_dir}")
+                source_path = os.path.join(self.reference_dir, *filepath)
+                dest_path = os.path.join(config_path, filepath[-1])
+            if os.path.exists(source_path):
+                try:
+                    shutil.copy2(source_path, dest_path)
+                    print(f"  ✓ Copied {filepath[-1]} from reference directory: {source_path}")
+                except Exception as e:
+                    print(f"  ! Failed to copy {filepath[-1]}: {e}")
+            else:
+                print(f"  ! {filepath[-1]} not found at: {source_path}")
                 print(f"    Check that the reference directory is correct: {self.reference_dir}")
-
 
     def is_running(self):
         """
