@@ -1,0 +1,45 @@
+# Example configuration for DCS Pylote
+# Copy this file to 'dcs_pylote_config.yaml' and modify as needed
+
+# DCS-BIOS connection settings
+dcs_bios:
+  host: "127.0.0.1"
+  port: 7778
+  timeout: 5.0
+
+# vJoy device settings
+vjoy:
+  device_count: 1
+  max_axes: 8
+  max_buttons: 128
+  max_povs: 4
+
+# Data mappings from DCS-BIOS to vJoy
+mappings:
+  # Example: Map throttle position to X-axis
+  - dcs_bios_input: "THROTTLE_LEFT"
+    vjoy_device: 1
+    vjoy_axis: "X"
+    scale_factor: 1.0
+    offset: 0.0
+    invert: false
+    description: "Left throttle to X-axis"
+  
+  # Example: Map master arm switch to button
+  - dcs_bios_input: "MASTER_ARM"
+    vjoy_device: 1
+    vjoy_button: 1
+    description: "Master arm switch to button 1"
+  
+  # Example: Map gear handle to button with custom scaling
+  - dcs_bios_input: "GEAR_HANDLE"
+    vjoy_device: 1
+    vjoy_button: 2
+    scale_factor: 1.0
+    offset: 0.0
+    invert: false
+    description: "Landing gear handle to button 2"
+
+# Application settings
+update_rate: 60.0  # Hz - how often to update vJoy outputs
+log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL

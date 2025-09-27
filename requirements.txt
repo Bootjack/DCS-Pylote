@@ -1,0 +1,9 @@
+# Core dependencies for DCS Pylote
+dcs-bios-connector
+pyvjoy
+
+# Development and utility dependencies
+python-dotenv
+pyyaml
+click
+colorama
