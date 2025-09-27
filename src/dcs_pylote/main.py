@@ -12,14 +12,10 @@ from typing import Optional
 import click
 from colorama import init, Fore, Style
 
-from .core.bridge import DCSVJoyBridge
-from .core.config import Config
 from .utils.logger import setup_logging
-
 
 # Initialize colorama for Windows
 init(autoreset=True)
-
 
 @click.command()
 @click.option(
@@ -58,39 +54,7 @@ def main(config: Optional[str], verbose: bool, debug: bool) -> None:
     print("╚══════════════════════════════════════╝")
     print(f"{Style.RESET_ALL}")
     
-    try:
-        # Load configuration
-        logger.info("Loading configuration...")
-        app_config = Config.load(config)
-        
-        # Initialize the bridge
-        logger.info("Initializing DCS-BIOS to vJoy bridge...")
-        bridge = DCSVJoyBridge(app_config)
-        
-        # Start the bridge
-        logger.info(f"{Fore.GREEN}Starting bridge... Press Ctrl+C to stop{Style.RESET_ALL}")
-        bridge.start()
-        
-        # Main application loop
-        try:
-            while bridge.is_running():
-                time.sleep(0.1)  # Small sleep to prevent excessive CPU usage
-                
-        except KeyboardInterrupt:
-            logger.info(f"{Fore.YELLOW}Shutdown requested by user{Style.RESET_ALL}")
-            
-    except Exception as e:
-        logger.error(f"{Fore.RED}Application error: {e}{Style.RESET_ALL}")
-        if debug:
-            logger.exception("Full traceback:")
-        sys.exit(1)
-        
-    finally:
-        logger.info("Shutting down bridge...")
-        if 'bridge' in locals():
-            bridge.stop()
-        logger.info(f"{Fore.GREEN}DCS Pylote stopped successfully{Style.RESET_ALL}")
-
+    logger.info(f"{Fore.GREEN}DCS Pylote stopped successfully{Style.RESET_ALL}")
 
 if __name__ == "__main__":
     main()
