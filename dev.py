@@ -40,6 +40,7 @@ def reload_modules(module_mapping=None, update_globals=True):
     if module_mapping is None:
         module_mapping = {
             'dcs_pylote.vendor.dcs_client': ['DCSClient', 'DCSLaunchMode'],
+            'dcs_pylote.vendor.autogui': ['DCSAutoGUI'],
             'dcs_pylote.main': ['main'],
             'dcs_pylote.utils.logger': ['setup_logging'],
         }
@@ -98,6 +99,12 @@ try:
     print("✓ DCSClient, DCSLaunchMode")
 except ImportError as e:
     print(f"✗ DCSClient: {e}")
+
+try:
+    from dcs_pylote.vendor.autogui import DCSAutoGUI
+    print("✓ DCSAutoGUI")
+except ImportError as e:
+    print(f"✗ DCSAutoGUI: {e}")
 
 try:
     from dcs_pylote.main import main

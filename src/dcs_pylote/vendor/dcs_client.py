@@ -56,6 +56,7 @@ class DCSClient:
             ])
         elif self.mode == DCSLaunchMode.SERVER:
             cmd.extend([
+                "--norender",        # Start in headless mode (no rendering)
                 "--server",         # Start in server mode (no GUI dialogs)
             ])
 
@@ -124,9 +125,6 @@ class DCSClient:
         """
         Copy Options.lua from the reference DCS directory's Config folder.
         """
-        options_source = os.path.join(self.reference_dir, "Config")
-        options_dest = os.path.join(config_path, "Options.lua")
-
         filepaths = [
             ["Config", "authdata.bin"],
             ["Config", "network.vault"],
@@ -167,9 +165,19 @@ class DCSClient:
         """
         Terminate the DCS World process.
         """
+
         if self.process and self.is_running():
             self.process.terminate()
             self.process.wait()
+            
+        # Delete the custom save directory for this client instance
+        instance_path = os.path.join(DEFAULT_DCS_REFERENCE_DIR, "..", self.write_dir)
+        if os.path.exists(instance_path):
+            try:
+                shutil.rmtree(instance_path)
+                print(f"  ✓ Deleted instance directory: {instance_path}")
+            except Exception as e:
+                print(f"  ! Failed to delete instance directory: {e}")
 
     def __del__(self):
         self.terminate()
